@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title>Title</title>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="/DataTables/DataTables-1.10.20/css/jquery.dataTables.min.css">
+		<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/DataTables/DataTables-1.10.20/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				$("#mytable").DataTable({
+					// 关闭本地分页
+					paging: false,
+					// 关闭搜索框
+					searching: false,
+					// 关闭排序
+					ordering: false,
+					// 获得表格地址
+					ajax: {
+						url: "list",
+						type: "post",
+						// 设定在请求列表的时候，所需要携带的请求参数
+						data: function(d) {
+							// 获得对应的设置信息
+							var tableSetings = $("#mytable").dataTable().fnSettings();
+							// 删除多余请求参数
+							for(var key in d) {
+								if(key.indexOf("columns")==0||key.indexOf("order")==0||key.indexOf("search")==0){
+									//以columns开头的参数删除
+									delete d[key];
+								}
+							}
+							// 扩展请求时候的数据，重点在于pageNum和pageSize
+							var params = {
+								// 获得表格对象后，
+								// 系统当前页码_iDisplayStart，默认从0开始
+								"pageNum": tableSetings._iDisplayStart + 1,
+								// 每页显示数量
+								"pageSize": tableSetings._iDisplayLength
+							}
+							// 将新增的查询数据扩展到请求参数上
+							$.extend(d, params); //给d扩展参数
+						},
+						// 设定回传的数据格式为JSON
+						dataType: "json",
+						// 过滤数据
+						dataFilter: function(data) {
+							data = JSON.parse(data);
+							var returnData = {};
+							returnData.draw = data.draw;
+							returnData.recordsTotal = data.totalSize;
+							returnData.recordsFiltered = data.totalSize;
+							returnData.data = data.list;
+							return JSON.stringify(returnData);
+						}
+					},
+					// 为表格的每一个字段设定具体的值
+					columnDefs: [{
+						targets: 0,
+						data: function (row, type, val, meta) {
+							// 在序号位置
+							var tableSetings = $("#mytable").dataTable().fnSettings();
+							var begin = tableSetings._iDisplayStart;
+							var size = tableSetings._iDisplayLength;
+							return begin * size + meta.row + 1;
+						}
+					}, {
+						targets: 1,
+						data: function (row, type, val, meta) {
+							// 在序号位置，row就代表JSON中list所对应的一个位置的数据对象
+							return row.studentName;
+						}
+					}, {
+						targets: 2,
+						data: function (row, type, val, meta) {
+							// 在序号位置，row就代表JSON中list所对应的一个位置的数据对象
+							return row.studentNo;
+						}
+					}, {
+						targets: 3,
+						data: function (row, type, val, meta) {
+							// 在序号位置，row就代表JSON中list所对应的一个位置的数据对象
+							var gender = "";
+							if (row.gender == "M") {
+								gender = "男";
+							} else {
+								gender = "女";
+							}
+							return gender;
+						}
+					}, {
+						targets: 4,
+						data: function (row, type, val, meta) {
+							// 在序号位置，row就代表JSON中list所对应的一个位置的数据对象
+							return row.classroom.classroomNo;
+						}
+					}, {
+						targets: 5,
+						data: function (row, type, val, meta) {
+							// 在序号位置，row就代表JSON中list所对应的一个位置的数据对象
+							return row.idCard;
+						}
+					}, {
+						targets: 6,
+						data: function (row, type, val, meta) {
+							var updateBtn = "<a href='javascript:openUpdataForm(" + row.studentId + ");' class='btn btn-warning btn-xs'><i class='fa fa-wrench'></i><span>修改学生信息</span></a>"
+							var deleteBtn = "<a href='#' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i><span>删除学生信息</span></a>"
+							return updateBtn + "&nbsp;" + deleteBtn;
+						}
+					}],
+					// 显示语言
+					language: {
+						"sProcessing": "处理中...",
+						"sLengthMenu": "显示 _MENU_ 项结果",
+						"sZeroRecords": "没有匹配结果",
+						"sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+						"sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+						"sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+						"sInfoPostFix": "",
+						"sSearch": "搜索:",
+						"sUrl": "",
+						"sEmptyTable": "表中数据为空",
+						"sLoadingRecords": "载入中...",
+						"sInfoThousands": ",",
+						"oPaginate": {
+							"sFirst": "首页",
+							"sPrevious": "上页",
+							"sNext": "下页",
+							"sLast": "末页"
+						},
+						"oAria": {
+							"sSortAscending": ": 以升序排列此列",
+							"sSortDescending": ": 以降序排列此列"
+						}
+					}
+				});
+			});
+
+			function addStudent() {
+				location.href = "add";
+			}
+			function openUpdataForm(studentId) {
+				location.href = "update";
+			}
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="container-fluid">
+							<div class="navbar-header">
+								<a class="navbar-brand" href="#">学生管理系统</a>
+							</div>
+							<div>
+								<ul class="nav navbar-nav">
+									<li><a href="#">学生管理</a></li>
+									<li><a href="#">班级管理</a></li>
+								</ul>
+							</div>
+						</div>
+					</nav>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<a href="javascript:addStudent();" class="btn btn-success btn-sm">
+						<i class="fa fa-user-plus"></i>
+						<span>添加学生</span>
+					</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<table id="mytable" class="table table-bordered table-hover">
+						<thead>
+						<tr>
+							<th>序号</th>
+							<th>学生姓名</th>
+							<th>学号</th>
+							<th>性别</th>
+							<th>班级</th>
+							<th>身份证号码</th>
+							<th>操作</th>
+						</tr>
+						</thead>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

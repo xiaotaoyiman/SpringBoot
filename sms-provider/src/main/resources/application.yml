@@ -1,0 +1,30 @@
+server:
+  port: 9988
+spring:
+  application:
+    name: sms-provider
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/sms_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: java
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      min-idle: 3
+      max-active: 15
+      initial-size: 5
+      min-evictable-idle-time-millis: 30000
+      max-evictable-idle-time-millis: 60000
+mybatis:
+  mapper-locations: classpath:/mapper/*.mapper.xml
+  type-aliases-package: cn.ekgc.sms.pojo.entity
+dubbo:
+  application:
+    name: sms-provider
+  protocol:
+    name: dubbo
+    port: 20880
+  registry:
+    address: zookeeper://localhost:2181
+  scan:
+    base-packages: cn.ekgc.sms

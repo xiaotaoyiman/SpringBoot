@@ -1,0 +1,20 @@
+server:
+  port: 9977
+spring:
+  application:
+    name: sms-consumer
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    prefix: classpath:/view/
+    suffix: .html
+dubbo:
+  application:
+    name: sms-consumer
+  protocol:
+    name: dubbo
+    port: 20880
+  registry:
+    address: zookeeper://localhost:2181
+  scan:
+    base-packages: cn.ekgc.sms

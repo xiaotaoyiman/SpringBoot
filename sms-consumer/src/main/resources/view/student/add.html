@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" xmlns:th="http://www.thymeleaf.org">
+		<title>Title</title>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
+		<script type="text/javascript" src="/js/jquery-3.4.1.min.js"></script>
+		<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+		<script type="text/javascript">
+			// 扩展身份证号码校验规则
+			$.validator.addMethod("isIdCard", function(value, element) {
+				var idCardReg = /^[1-9]\d{16}[\d|X|x]$/;
+				return idCardReg.test(value);
+			}, "请正确填写身份证号码");
+
+			$(function () {
+				// 异步获得所有班级信息
+				$.ajax({
+					// 请求url
+					url: "../classroom/list",
+					type: "post",
+					dataType: "json",
+					success: function (data) {
+						var options = "";
+						data = data.list;
+						for (var i = 0; i < data.length; i++) {
+							options = options + "<option value='" + data[i].classroomId + "'>" + data[i].classroomNo + "</option>"
+						}
+						// 将对应的HTML增加到指定的select标签处
+						$("#classroomId").html(options);
+					}
+				});
+			});
+
+			$(function () {
+				$("#myForm").validate({
+					// 将表单的提交事件进行阻止
+					submitHandler: function (form) {
+						// 进行异步添加学生信息
+						// 将表单数据进行格式化
+						var formData = $("#myForm").serialize();
+						$.ajax({
+							url: "add",
+							type: "post",
+							data: formData,
+							dataType: "json",
+							success: function (data) {
+								if (data) {
+									alert("添加成功");
+									// 页面重定向
+									location.href = "index";
+								} else {
+									alert("添加失败");
+								}
+							}
+						});
+					},
+					// 校验规则
+					rules: {
+						"studentName": {
+							required: true
+						},
+						"idCard": {
+							required: true,
+							isIdCard: true
+						}
+					},
+					// 报错信息
+					messages: {
+						"studentName": {
+							required: "请填写学生姓名"
+						},
+						"idCard": {
+							required: "请填写学生的身份证号码",
+							isIdCard: "请正确填写学生的身份证号码"
+						}
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">logo</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12" style="text-align: center;">
+					<h1>新增用户信息</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<form id="myForm" role="form">
+						<table>
+							<tr>
+								<td style="text-align: right;">
+									<span style="color: red;">*</span>
+									<i class="fa fa-user"></i>
+									<span>学生姓名：</span>
+								</td>
+								<td>
+									<input type="text" id="studentName" name="studentName" class="form-control" style="width: 300px;" placeholder="请填写学生姓名"/>
+								</td>
+								<td style="padding: 0px 5px;">
+									<label class="error" for="studentName" style="color: red;"></label>
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: right;">
+									<span style="color: red;">*</span>
+									<i class="fa fa-id-card"></i>
+									<span>身份证号码：</span>
+								</td>
+								<td>
+									<input type="text" id="idCard" name="idCard" class="form-control" style="width: 300px;" placeholder="请填写学生身份证号码"/>
+								</td>
+								<td style="padding: 0px 5px;">
+									<label class="error" for="idCard" style="color: red;"></label>
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: right;">
+									<span style="color: red;">*</span>
+									<i class="fa fa-user"></i>
+									<span>所在班级：</span>
+								</td>
+								<td>
+									<select id="classroomId" name="classroomId" class="form-control" style="width: 300px;">
+
+									</select>
+								</td>
+								<td style="padding: 0px 5px;">
+									<label class="error" for="classroomId"></label>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" style="text-align: right">
+									<button type="submit" class="btn btn-success btn-sm">
+										<i class="fa fa-user-plus"></i>
+										<span>提交学生信息</span>
+									</button>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
